@@ -3,8 +3,8 @@
 Parallel Task Manager is a utility package that helps to parallelize tasks on a simple node.
 
 ## Usage
-1. Create a file that contains all the command line that you need to execute. Each line represent a task
-2. parallel-task-manager.py -f <path_to_the_file> -p <number of process> [--timeout <timeout in sec>]
+1. Create a file that contains all the command line that you need to execute. Each line represents a task.
+2. `parallel-task-manager.py -f <path_to_the_file> -p <number of process> [--timeout <timeout in sec>]`
 
 ```
 usage: parallel-task-manager.py [-h] --path PATH --process PROCESS [--timeout TIMEOUT]
@@ -19,3 +19,16 @@ optional arguments:
   --timeout TIMEOUT, -t TIMEOUT
                         The maximum execution time (in sec)
 ```
+
+## Example
+
+example.txt
+```
+sleep(5);echo "Hello";
+sleep(10);
+sleep(15);
+sleep(2);
+sleep(15);
+```
+
+`parallel-task-manager.py -f example.txt -p 3 --timeout 6`
