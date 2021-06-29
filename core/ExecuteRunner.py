@@ -89,6 +89,8 @@ class TaskRunner(Runner):
     def done(self, task):
         if task.status == "RUNNING":
             task.status = "FINISHED"
+        if task.error is not None:
+            print("\nCommand %s finished with an error: \n\t: %s\n" %(task.command, task.error))
         task.end_date = time.time()
         self.finished += [task]
         pass

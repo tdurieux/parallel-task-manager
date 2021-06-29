@@ -12,6 +12,7 @@ class Task(object):
         self.starting_date = None
         self.done = False
         self.process = None
+        self.error = None
 
     def run(self, timeout=None, gpu=None):
         self.starting_date = time.time()
