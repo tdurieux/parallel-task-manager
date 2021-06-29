@@ -5,6 +5,7 @@ except ImportError:
 from threading import Thread
 import time
 import subprocess
+import GPUtil
 
 
 from core.renderer.renderer import get_renderer
@@ -16,7 +17,7 @@ class RunnerWorker(Thread):
         self.local_runner = local_runner
         self.callback = callback
         self.daemon = True
-        self.pool = ThreadPool(process, timeout=timeout)
+        self.pool = ThreadPool(process, timeout=timeout, with_gpu=local_runner.with_gpu)
 
     def run(self):
         for task in self.local_runner.tasks:
@@ -27,11 +28,12 @@ class RunnerWorker(Thread):
 
 
 class Worker(Thread):
-    def __init__(self, tasks, timeout=None):
+    def __init__(self, tasks, timeout=None, gpu=None):
         Thread.__init__(self)
         self.tasks = tasks
         self.daemon = True
         self.timeout = timeout
+        self.gpu = gpu
         self.start()
 
     def run(self):
@@ -39,7 +41,7 @@ class Worker(Thread):
             (task, callback) = self.tasks.get()
             task.status = "RUNNING"
             try:
-                task.run(timeout=self.timeout)  
+                task.run(timeout=self.timeout, gpu=self.gpu)  
             except subprocess.TimeoutExpired as e:
                 task.status = "TIMEOUT"      
             except Exception as e:
@@ -53,11 +55,15 @@ class Worker(Thread):
 
 class ThreadPool:
     """Pool of threads consuming tasks from a queue"""
-    def __init__(self, num_threads, timeout=None):
+    def __init__(self, num_threads, timeout=None, with_gpu=False):
         self.tasks = queue.Queue(num_threads)
         self.workers = []
-        for _ in range(num_threads):
-            self.workers.append(Worker(self.tasks, timeout=timeout))
+        nb_gpus = len(GPUtil.getGPUs())
+        for i in range(num_threads):
+            gpu = None
+            if with_gpu and nb_gpus > 0:
+                gpu = i % nb_gpus
+            self.workers.append(Worker(self.tasks, timeout=timeout, gpu=gpu))
 
     def add_task(self, task, callback):
         """Add a task to the queue"""

@@ -12,6 +12,7 @@ class Runner(object):
         self.running = []
         self.waiting = []
         self.args = args
+        self.with_gpu = args.gpu
         self.timeout = None
         if args.timeout is not None:
             self.timeout = args.timeout

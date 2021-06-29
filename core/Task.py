@@ -1,10 +1,9 @@
 import time
 import subprocess
-import GPUtil
 
 class Task(object):
 
-    def __init__(self, command, with_gpu=False):
+    def __init__(self, command):
         """"
         :type str: command
         """
@@ -13,14 +12,12 @@ class Task(object):
         self.starting_date = None
         self.done = False
         self.process = None
-        self.with_gpu = with_gpu
 
-    def run(self, timeout=None):
+    def run(self, timeout=None, gpu=None):
         self.starting_date = time.time()
         cmd = self.command
-        if self.with_gpu:
-            gpu_ids = GPUtil.getAvailable(order = 'memory', limit = 1, includeNan=False)
-            cmd = "CUDA_VISIBLE_DEVICES=%d %s" % (gpu_ids[0], cmd)
+        if gpu is not None:
+            cmd = "CUDA_VISIBLE_DEVICES=%d %s" % (gpu, cmd)
         self.process = subprocess.Popen(cmd, shell=True)
         if timeout is not None:
             self.process.wait(timeout)
