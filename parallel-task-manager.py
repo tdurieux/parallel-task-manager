@@ -20,6 +20,9 @@ if __name__ == "__main__":
   with open(args.path, 'r', encoding="utf8") as fd:
     content = fd.read()
     for line in content.split("\n"):
+      if len(line.strip()) == 0:
+        continue
       tasks.append(Task(line, with_gpu=args.gpu))
   runner = TaskRunner(tasks, args)
   runner.execute()
+  
